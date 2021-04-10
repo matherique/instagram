@@ -10,16 +10,20 @@ import (
 	"sync"
 )
 
-const LINK string = "https://www.instagram.com/p/CNIq9h4Hu-J/"
-
 var mutex sync.Mutex
 
 func main() {
-	fmt.Fprintf(os.Stdout, "ola mundo")
+	if len(os.Args) == 1 {
+		fmt.Println("no instagram link")
+		return
+	}
+
+	LINK := string(os.Args[1])
 	client := &http.Client{}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
+
 	go func() {
 		mutex.Lock()
 		req, err := http.NewRequest("GET", LINK, nil)
@@ -45,10 +49,10 @@ func main() {
 		url := strings.Replace(string(matches), "<meta property=\"og:image\" content=\"", "", -1)
 		url = strings.Replace(url, "\" />", "", -1)
 
-		fmt.Fprintf(os.Stdout, url)
+		fmt.Fprintf(os.Stdout, fmt.Sprintf("%s\n", url))
 		mutex.Unlock()
 		wg.Done()
 	}()
-	wg.Wait()
 
+	wg.Wait()
 }
