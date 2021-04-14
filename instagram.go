@@ -11,7 +11,6 @@ import (
 )
 
 func getPhoto(link string) string {
-
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", link, nil)
 
@@ -33,51 +32,45 @@ func getPhoto(link string) string {
 	reg := regexp.MustCompile("<meta property=\"og:image\"([\\w\\W]+?)/>")
 	matches := reg.Find(data)
 
-	fmt.Println(string(data))
-
 	url := strings.Replace(string(matches), "<meta property=\"og:image\" content=\"", "", -1)
 	url = strings.Replace(url, "\" />", "", -1)
 
-	return fmt.Sprintf("AAAAAAAA%s", url)
+	return url
 }
 
 func main() {
 	flag.Parse()
 
-	if flag.NArg() == 1 {
+	if flag.NArg() < 1 {
 		fmt.Fprintln(os.Stderr, "missing instagram link")
 		os.Exit(1)
 	}
 
-	/*
-		photos := make(chan string, flag.NArg())
-		links := make(chan string, flag.NArg())
+	photos := make(chan string, flag.NArg())
+	links := make(chan string, flag.NArg())
 
-		go func() {
-			for l := range links {
-				fmt.Println(l)
-				photos <- getPhoto(l)
-			}
-		}()
-
-		go func() {
-			for l := range links {
-				fmt.Println(l)
-				photos <- getPhoto(l)
-			}
-		}()
-
-		for _, l := range flag.Args() {
-			links <- l
+	go func() {
+		for l := range links {
+			fmt.Println(l)
+			photos <- getPhoto(l)
 		}
+	}()
 
-		close(links)
-
-		for i := 0; i < flag.NArg(); i++ {
-			fmt.Fprintln(os.Stdout, <-photos)
+	go func() {
+		for l := range links {
+			fmt.Println(l)
+			photos <- getPhoto(l)
 		}
-	*/
+	}()
 
-	fmt.Println(getPhoto(flag.Arg(1)))
+	for _, l := range flag.Args() {
+		links <- l
+	}
+
+	close(links)
+
+	for i := 0; i < flag.NArg(); i++ {
+		fmt.Fprintln(os.Stdout, <-photos)
+	}
 
 }
