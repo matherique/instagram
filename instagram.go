@@ -51,14 +51,6 @@ func main() {
 
 	go func() {
 		for l := range links {
-			fmt.Println(l)
-			photos <- getPhoto(l)
-		}
-	}()
-
-	go func() {
-		for l := range links {
-			fmt.Println(l)
 			photos <- getPhoto(l)
 		}
 	}()
